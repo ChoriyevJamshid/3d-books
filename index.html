@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B0D12" />
+  <meta name="description" content="Beyond Pages — an immersive 3D digital library. Pick up a book, open it, turn its pages and read." />
+  <title>Beyond Pages — Immersive 3D Library</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%238B5CF6'/%3E%3Cpath d='M18 16h18a10 10 0 0 1 0 20H18zm0 20h20a10 10 0 0 1 0 20H18z' fill='none' stroke='white' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/font/lucide.min.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/reader.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+  } }
+  </script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+  <!-- Loading screen -->
+  <div class="loader" id="loader" role="status" aria-live="polite">
+    <div class="loader-book" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><b></b></div>
+    <div class="loader-brand">BEYOND<span>PAGES</span></div>
+    <div class="loader-bar"><span id="loaderBar"></span></div>
+    <p class="loader-msg" id="loaderMsg">Opening the library…</p>
+  </div>
+
+  <canvas id="dust" aria-hidden="true"></canvas>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+
+  <div id="app">
+    <header class="site-header" id="siteHeader">
+      <a class="brand" href="#home" aria-label="Beyond Pages — home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M6 4h7a4 4 0 0 1 0 8H6zm0 8h8a4 4 0 0 1 0 8H6z"/></svg></span>
+        <span class="brand-text">BEYOND<b>PAGES</b></span>
+      </a>
+      <nav class="desktop-nav" aria-label="Primary">
+        <a href="#library">Library</a>
+        <a href="#about">Experience</a>
+        <a href="#featured">Featured</a>
+      </nav>
+      <div class="header-actions">
+        <button class="header-cta" id="headerExplore" type="button">Enter library <i class="icon-arrow-up-right"></i></button>
+        <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav"><i class="icon-menu"></i></button>
+      </div>
+    </header>
+
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile" hidden>
+      <a href="#library">Library</a>
+      <a href="#about">Experience</a>
+      <a href="#featured">Featured</a>
+      <a href="#library" data-filter="Favorites">My favorites</a>
+    </nav>
+
+    <main>
+      <!-- A. HERO -->
+      <section class="hero" id="home">
+        <div class="hero-copy">
+          <div class="eyebrow"><span></span> THE NEXT CHAPTER STARTS HERE</div>
+          <h1>A World<br>Beyond <em>Pages</em></h1>
+          <p class="hero-sub">Explore stories. Discover knowledge. Experience books in a whole new dimension.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="exploreBtn" type="button">Explore Library <i class="icon-arrow-right"></i></button>
+            <a class="btn btn-ghost" href="#about">Discover More <i class="icon-arrow-down"></i></a>
+          </div>
+          <ul class="hero-stats" aria-label="Library at a glance">
+            <li><b id="statBooks">9</b><span>books</span></li>
+            <li><b id="statCats">6</b><span>categories</span></li>
+            <li><b>3D</b><span>reading</span></li>
+          </ul>
+        </div>
+        <div class="hero-stage" id="heroStage">
+          <div class="stage-ring ring-1"></div><div class="stage-ring ring-2"></div>
+          <canvas id="heroCanvas" aria-label="Interactive 3D books floating in space. Click a small book to open it."></canvas>
+          <div class="hero-fallback" id="heroFallback" hidden></div>
+          <div class="float-tag tag-a"><i class="icon-mouse-pointer-click"></i> Hover &amp; click a book</div>
+        </div>
+        <a class="scroll-cue" href="#library" aria-label="Scroll to the library"><span>SCROLL</span><i></i></a>
+      </section>
+
+      <!-- B. LIBRARY -->
+      <section class="section library" id="library">
+        <div class="section-head" data-reveal>
+          <div><div class="eyebrow"><span></span> YOUR NEXT DISCOVERY</div><h2>The <em>Library</em></h2></div>
+          <p>Choose a book from the shelf. Lift it, open it, and turn the pages.</p>
+        </div>
+
+        <div class="recent hidden" id="recentWrap" data-reveal>
+          <div class="recent-head"><h3><i class="icon-clock"></i> Recently opened</h3></div>
+          <div class="recent-rail" id="recentRail"></div>
+        </div>
+
+        <div class="toolbar" data-reveal>
+          <div class="filters" id="categoryFilters" role="group" aria-label="Filter by category"></div>
+          <label class="search" for="searchInput">
+            <i class="icon-search" aria-hidden="true"></i>
+            <input id="searchInput" type="search" placeholder="Search title or author…" autocomplete="off" aria-label="Search books" />
+            <kbd aria-hidden="true">/</kbd>
+          </label>
+        </div>
+        <div class="meta-row"><span id="resultCount">00 BOOKS</span><span class="meta-hint">TAP A BOOK TO PICK IT UP</span></div>
+        <div class="book-grid" id="bookGrid" aria-live="polite"></div>
+        <div class="empty hidden" id="emptyState"></div>
+      </section>
+
+      <!-- Experience -->
+      <section class="section about" id="about">
+        <div class="about-visual" data-reveal>
+          <div class="about-glow"></div>
+          <div class="about-book" aria-hidden="true">
+            <div class="ab-page ab-1"></div><div class="ab-page ab-2"></div><div class="ab-page ab-3"></div>
+            <div class="ab-cover"><span>Turn the<br>page</span></div>
+          </div>
+        </div>
+        <div class="about-copy" data-reveal>
+          <div class="eyebrow"><span></span> MORE THAN WORDS</div>
+          <h2>Feel the weight of a story, <em>not just read it.</em></h2>
+          <p>Not another reading app. A digital space that borrows the tactility of a real book — the lift of a cover, the bend of a page — and keeps everything that makes screens useful.</p>
+          <ul class="points">
+            <li><i class="icon-box"></i><div><b>Real 3D objects</b><span>Boards, spines, page edges and shadows rendered with Three.js.</span></div></li>
+            <li><i class="icon-book-open"></i><div><b>Pages that bend</b><span>Click, press ← →, or swipe. Every turn is a physical motion.</span></div></li>
+            <li><i class="icon-bookmark"></i><div><b>Your reading journey</b><span>Progress, bookmarks and favorites are remembered.</span></div></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Featured -->
+      <section class="section featured" id="featured">
+        <div class="section-head" data-reveal>
+          <div><div class="eyebrow"><span></span> HANDPICKED</div><h2>Featured <em>books</em></h2></div>
+          <button class="btn btn-ghost" id="featuredAll" type="button">Browse all <i class="icon-arrow-up-right"></i></button>
+        </div>
+        <div class="featured-grid" id="featuredGrid"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="brand" href="#home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M6 4h7a4 4 0 0 1 0 8H6zm0 8h8a4 4 0 0 1 0 8H6z"/></svg></span><span class="brand-text">BEYOND<b>PAGES</b></span></a>
+      <p>Sample texts are original works written for this demo.</p>
+      <span>© 2026 Beyond Pages</span>
+    </footer>
+  </div>
+
+  <!-- C + D. READER -->
+  <div class="reader" id="reader" role="dialog" aria-modal="true" aria-label="Book reader" aria-hidden="true" hidden>
+    <div class="reader-backdrop" id="readerBackdrop"></div>
+
+    <div class="reader-bar">
+      <button class="bar-btn" id="closeReader" type="button"><i class="icon-arrow-left"></i><span id="closeLabel">Back to library</span></button>
+      <div class="bar-title" id="readerBarTitle"></div>
+      <div class="bar-actions">
+        <button class="bar-btn icon-only bookmark-btn" id="bookmarkBtn" type="button" aria-label="Bookmark this page (B)" aria-pressed="false"><i class="icon-bookmark"></i></button>
+        <button class="bar-btn icon-only fav-toggle" id="readerFav" type="button" aria-label="Favorite" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="reader-stage" id="readerStage">
+      <div class="book-scene">
+        <div class="book-rig" id="bookRig">
+          <div class="book" id="readerBook" data-mode="double">
+            <div class="board board-l"></div><div class="board board-r"></div>
+            <div class="stack stack-l"></div><div class="stack stack-r"></div>
+            <div class="pg pg-l empty" id="pgL"><div class="box"></div><i class="cast"></i></div>
+            <div class="pg pg-r" id="pgR"><div class="box"></div><i class="cast"></i><i class="curl"></i></div>
+            <div class="flipper" id="flipper"></div>
+          </div>
+          <div class="book-floor" id="bookFloor"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D. DETAILS -->
+    <aside class="detail-panel" id="detailPanel" aria-label="Book details">
+      <div class="detail-cat stagger" id="detailCategory"></div>
+      <h2 class="detail-title stagger" id="detailTitle"></h2>
+      <p class="detail-author stagger" id="detailAuthor"></p>
+      <p class="detail-desc stagger" id="detailDesc"></p>
+      <dl class="detail-meta stagger">
+        <div><dt><i class="icon-layers"></i> Pages</dt><dd id="metaPages"></dd></div>
+        <div><dt><i class="icon-calendar"></i> Published</dt><dd id="metaYear"></dd></div>
+        <div><dt><i class="icon-clock"></i> Reading time</dt><dd id="metaTime"></dd></div>
+        <div><dt><i class="icon-tag"></i> Category</dt><dd id="metaCat"></dd></div>
+      </dl>
+      <div class="detail-progress stagger hidden" id="detailProgress"><div class="bar"><i id="detailProgressFill"></i></div><span id="detailProgressText"></span></div>
+      <div class="detail-bookmarks stagger hidden" id="detailBookmarks"><span>Bookmarks</span><div class="chips"></div></div>
+      <div class="detail-actions stagger">
+        <button class="btn btn-primary" id="readBtn" type="button"><i class="icon-book-open"></i><span>Read Book</span></button>
+        <button class="btn btn-ghost fav-toggle" id="detailFav" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg><span>Add to favorites</span></button>
+      </div>
+    </aside>
+
+    <!-- controls -->
+    <div class="reader-controls" id="readerControls">
+      <button class="nav-btn" id="prevPage" type="button" aria-label="Previous page"><i class="icon-chevron-left"></i></button>
+      <div class="progress-block">
+        <div class="page-indicator" id="pageIndicator" aria-live="polite"></div>
+        <div class="progress-track" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100"><i id="progressFill"></i></div>
+      </div>
+      <b class="progress-pct" id="progressPct">0%</b>
+      <button class="nav-btn" id="nextPage" type="button" aria-label="Next page"><i class="icon-chevron-right"></i></button>
+    </div>
+    <div class="reader-hint" id="readerHint" aria-hidden="true"></div>
+    <div class="flyer-layer" id="flyerLayer" aria-hidden="true"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+/* ==========================================================================
+   animations.css — keyframes and reduced-motion handling
+   ========================================================================== */
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes cue { 0% { transform: scaleY(0); opacity: 0; } 40% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; transform-origin: bottom; } }
+@keyframes dropIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(34px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes coverBreath { 0%, 100% { transform: translateZ(18px) rotateY(-22deg); } 50% { transform: translateZ(18px) rotateY(-34deg); } }
+@keyframes loaderFlip { 0% { transform: rotateY(0); } 45%, 100% { transform: rotateY(-170deg); } }
+@keyframes loaderGlow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* shelf cards fade up with a stagger each time the grid re-renders */
+.book-grid .book-card { animation: cardIn 0.7s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+
+/* loader: a small book that keeps turning pages */
+.loader-book { position: relative; width: 64px; height: 86px; perspective: 520px; transform: rotateX(12deg); }
+.loader-book i, .loader-book b { position: absolute; inset: 0; border-radius: 2px 5px 5px 2px; transform-origin: left center; }
+.loader-book b { background: linear-gradient(135deg, #6d3fe0, #241552); transform: translateZ(-2px); box-shadow: 0 14px 40px rgba(139, 92, 246, 0.45); animation: loaderGlow 1.6s ease-in-out infinite; }
+.loader-book i { background: #efe6d0; border: 1px solid #d9cdb1; animation: loaderFlip 1.8s var(--ease) infinite; }
+.loader-book i:nth-child(1) { animation-delay: 0s; }
+.loader-book i:nth-child(2) { animation-delay: 0.18s; }
+.loader-book i:nth-child(3) { animation-delay: 0.36s; }
+.loader-book i:nth-child(4) { animation-delay: 0.54s; }
+.loader-book i:nth-child(5) { animation-delay: 0.72s; background: linear-gradient(135deg, #8b5cf6, #38bdf8); border-color: transparent; }
+
+/* button & link micro-interactions */
+.points li > i { transition: transform 0.5s var(--ease), background 0.3s; }
+.points li:hover > i { transform: rotate(-8deg) scale(1.08); background: rgba(139, 92, 246, 0.3); }
+.recent-item:active, .filter-btn:active, .bar-btn:active { transform: scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+  .book-grid .book-card { animation: none; }
+  .ring-2, .scroll-cue i, .ab-cover { animation: none !important; }
+}
